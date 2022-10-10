@@ -84,7 +84,13 @@ for k in vehiculos:
     prob+= pulp.lpSum(q[i]*pulp.lpSum(x[i,j,k] for j in nodos if i!=j) for i in clientes) <= Q[k]
 
 #Ventana de Tiempo
+    
+     
+
+prob+= pulp.lpSum(t[i,k] >= e[i] for i,k in arco_tiempos)
+prob+= pulp.lpSum(t[i,k] <=l[i] for i,k in arco_tiempos)
 
 prob.setObjective(objective)
 
 prob.solve()
+print(prob)
