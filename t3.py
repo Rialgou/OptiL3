@@ -76,6 +76,14 @@ for i in clientes:
 for i in clientes:
     prob+= pulp.lpSum(x[i,j,k] for j in nodos for k in vehiculos if i!=j)==1 
 #Flujo cada nodo solo visita un nodo y cada nodo es visitado por un nodo
+for i in nodos:
+    prob+= (pulp.lpSum(x[i,j,k] for j in nodos if i!=j) -pulp.lpSum(x[j,i,k] for j in nodos if i!= j) == 0 for k in vehiculos)
+
+#Capacidad del vehiculo
+for k in vehiculos:
+    prob+= pulp.lpSum(q[i]*pulp.lpSum(x[i,j,k] for j in nodos if i!=j) for i in clientes) <Q[k]
+
+#Ventana de Tiempo
 
 prob.setObjective(objective)
 
