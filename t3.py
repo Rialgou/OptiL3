@@ -2,6 +2,7 @@ import pulp
 import numpy as np
 import matplotlib.pyplot as plt
 from pulp.constants import LpConstraintEQ
+from pulp.pulp import LpConstraint
 
 #Nodos
 n =11
@@ -58,7 +59,7 @@ arco_tiempos = [(i,k) for i in nodos for k in vehiculos]
 
 #Client Set
 x = {i:pulp.LpVariable('x_{}'.format(i),cat ="Binary") for i in arco_var} 
-t = {i:pulp.LpVariable('t_{}'.format(i),cat="Continuous") for i in arco_tiempos}
+t = {i:pulp.LpVariable('t_{}'.format(i),cat="Integer") for i in arco_tiempos}
 
 
 
@@ -84,13 +85,21 @@ for k in vehiculos:
     prob+= pulp.lpSum(q[i]*pulp.lpSum(x[i,j,k] for j in nodos if i!=j) for i in clientes) <= Q[k]
 
 #Ventana de Tiempo
-    
-     
+for k in vehiculos:
+    for i in clientes:
+        for j in clientes:
+            if i!=j:
+                M = max(l[i]+tiempo[i,j]-e[i],0)
+                prob+= t[i,k] + tiempo[i,j] - M*(1-x[i,j,k]) <= t[j,k]
 
-prob+= pulp.lpSum(t[i,k] >= e[i] for i,k in arco_tiempos)
-prob+= pulp.lpSum(t[i,k] <=l[i] for i,k in arco_tiempos)
+
+for k in vehiculos:
+    for i in nodos:
+        prob+= t[i,k] >= e[i] 
+        prob+= t[i,k] <= l[i]
+
 
 prob.setObjective(objective)
 
 prob.solve()
-print(prob)
+#print(prob)
