@@ -2,6 +2,7 @@ import pulp
 import numpy as np
 import matplotlib.pyplot as plt
 from pulp.constants import LpConstraintEQ
+import matplotlib
 
 #Nodos
 n =11
@@ -94,3 +95,27 @@ prob.setObjective(objective)
 
 prob.solve()
 print(prob)
+
+#*  Dibuja el plano nuevamente
+plt.figure(figsize=(10, 10))
+for i in range(len(nodos)):
+    if i == 0:
+        plt.scatter(X[i], Y[i], c='r')
+        plt.text(X[i] + 1, Y[i] + 1, 'depot')
+    else:
+        plt.scatter(X[i], Y[i], c='black')
+        demand = q[i]
+        plt.text(X[i] + 1, Y[i] + 1, f'{i}({demand})')
+
+plt.xlim([np.min(X)-5, np.max(X)+5])
+plt.ylim([np.min(Y)-5, np.max(Y)+5])
+plt.title('points: id(demand)')
+
+#* Agrega las rutas recorridas por los vehiculos involucrados
+cmap = matplotlib.cm.get_cmap('Dark2')
+for i in nodos:
+    for j in nodos:
+        for k in vehiculos:
+            if i != j and pulp.value(x[i, j, k]) == 1:
+                plt.plot([X[i], X[j]], [Y[i], Y[j]], color=cmap(k), alpha=0.4)
+plt.show()
