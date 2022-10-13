@@ -1,4 +1,3 @@
-from http import client
 import pulp 
 import numpy as np
 import matplotlib
@@ -8,7 +7,7 @@ import linecache
 
 
 #Leer archivos del txt
-dir ='Instancias_Tarea_3\SOLOMON_C101.txt'
+dir ='Instancias_Tarea_3/HOMBERGER_C1_2_1.txt'
 with open(dir,'r') as fp:
     count = 0
     for line in fp:
@@ -56,7 +55,7 @@ plt.scatter(X,Y,color='blue')
 
 #DC
 plt.scatter(X[0],Y[0],color='red',marker='D')
-plt.annotate("Deposit|$t_{%d}$=(%d$,%d$)" %(0,e[0],l[0]),(X[0]-1,Y[0]+1))
+plt.annotate("Depot|$t_{%d}$=(%d$,%d$)" %(0,e[0],l[0]),(X[0]-1,Y[0]+1))
 
 for i in clientes:
     plt.annotate('$cliente_{%d}|q_{%d}=%d$|$t_{%d}$=(%d$,%d$)' %(i,i,q[i],i,e[i],l[i]),(X[i]-1,Y[i]+0.5))
@@ -117,13 +116,25 @@ for k in vehiculos:
 
 
 prob.setObjective(objective)
+prob.solve(pulp.PULP_CBC_CMD(timeLimit=1800))
+dirW ='Instancias_Tarea_3/HOMBERGER_C1_2_1_respuestas.txt'
+fileW = open(dirW,'a')
+for i in nodos:
+    for j in nodos:
+        for k in vehiculos:
+            if i!=j:
+                if x[i,j,k].value()>0.9:
+                    fileW.write(str(x[i,j,k]) + ' = ' + str(x[i,j,k].value()) + '\n')
+for i in nodos:
+    for k in vehiculos:
+        fileW.write(str(t[i,k]) + ' = ' + str(t[i,k].value()) + '\n')
 
-prob.solve()
+
 rutas =[]
 vehiculo =[]
 for k in vehiculos:
     for i in nodos:
-        if i!=0 and x[0,i,k].value()>0.9:
+        if i!=0 and x[0,i,k].value()==1:
             aux=[0,i]
             while i!=0:
                 j=i
@@ -150,7 +161,7 @@ plt.figure(figsize=(10, 10))
 for i in range(len(nodos)):
     if i == 0:
         plt.scatter(X[i], Y[i], c='red',marker='D')
-        plt.text(X[i] + 1, Y[i] + 1, 'Deposit')
+        plt.text(X[i] + 1, Y[i] + 1, 'Depot')
     else:
         plt.scatter(X[i], Y[i], c='blue')
         demand = q[i]
@@ -172,3 +183,4 @@ for r in range(len(rutas)):
 plt.xlabel("Distancia X")
 plt.ylabel("Distancia Y")
 plt.show()
+fileW.close()
